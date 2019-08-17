@@ -171,7 +171,7 @@ func! s:rtp_add_defaults()
   let &rtp = current
   let default_rtp_items = split(default, ',')
   if !empty(default_rtp_items)
-    let first_item = fnameescape(default_rtp_items[0])
+    let first_item = vundle#compat#fnameescape(default_rtp_items[0])
     exec 'set rtp-=' . first_item
     exec 'set rtp^=' . first_item
   endif
@@ -184,10 +184,12 @@ endf
 " ---------------------------------------------------------------------------
 func! s:rtp_rm_a()
   let paths = map(copy(g:vundle#bundles), 'v:val.rtpath')
-  let prepends = join(paths, ',')
-  let appends = join(paths, '/after,').'/after'
-  exec 'set rtp-='.fnameescape(prepends)
-  exec 'set rtp-='.fnameescape(appends)
+  if !empty(paths)
+    let prepends = join(paths, ',')
+    let appends = join(paths, '/after,').'/after'
+    call vundle#compat#rtp_rm_entry(prepends)
+    call vundle#compat#rtp_rm_entry(appends)
+  endif
 endf
 
 
@@ -197,10 +199,12 @@ endf
 " ---------------------------------------------------------------------------
 func! s:rtp_add_a()
   let paths = map(copy(g:vundle#bundles), 'v:val.rtpath')
-  let prepends = join(paths, ',')
-  let appends = join(paths, '/after,').'/after'
-  exec 'set rtp^='.fnameescape(prepends)
-  exec 'set rtp+='.fnameescape(appends)
+  if !empty(paths)
+    let prepends = join(paths, ',')
+    let appends = join(paths, '/after,').'/after'
+    call vundle#compat#rtp_addset_entry(prepends,'^')
+    call vundle#compat#rtp_addset_entry(appends,'+')
+  endif
 endf
 
 
@@ -211,8 +215,10 @@ endf
 "           'after' directory will also be removed.
 " ---------------------------------------------------------------------------
 func! s:rtp_rm(dir) abort
-  exec 'set rtp-='.fnameescape(expand(a:dir, 1))
-  exec 'set rtp-='.fnameescape(expand(a:dir.'/after', 1))
+  if !empty(a:dir)
+    call vundle#compat#rtp_rm_entry(expand(a:dir, 1))
+    call vundle#compat#rtp_rm_entry(expand(a:dir.'/after', 1))
+  endif
 endf
 
 
@@ -223,8 +229,10 @@ endf
 "           'after' directory will also be added.
 " ---------------------------------------------------------------------------
 func! s:rtp_add(dir) abort
-  exec 'set rtp^='.fnameescape(expand(a:dir, 1))
-  exec 'set rtp+='.fnameescape(expand(a:dir.'/after', 1))
+  if !empty(a:dir)
+    call vundle#compat#rtp_addset_entry(expand(a:dir, 1), '^')
+    call vundle#compat#rtp_addset_entry(expand(a:dir.'/after', 1), '+')
+  endif
 endf
 
 
