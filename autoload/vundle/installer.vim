@@ -18,8 +18,11 @@ func! vundle#installer#new(bang, ...) abort
     let bundles = map(copy(a:000), 'vundle#config#bundle(v:val, {})')
   endif
 
+  let bundles = filter(copy(bundles), '!empty(v:val)')
+
   if empty(bundles)
-    echoerr 'No bundles were selected for operation'
+    let operation = a:bang ? 'update' : 'installation'
+    echomsg 'Vundle warning: No (valid) plugins were selected for ' . operation
     return
   endif
 
@@ -148,10 +151,13 @@ endf
 " return -- the return value from vundle#installer#install()
 " ---------------------------------------------------------------------------
 func! vundle#installer#install_and_require(bang, name) abort
+  let bundle = vundle#config#bundle(a:name, {})
+  if empty(bundle)
+    return 'error'
+  endif
   let result = vundle#installer#install(a:bang, a:name)
-  let b = vundle#config#bundle(a:name, {})
-  call vundle#installer#helptags([b])
-  call vundle#config#require([b])
+  call vundle#installer#helptags([bundle])
+  call vundle#config#require([bundle])
   return result
 endf
 
